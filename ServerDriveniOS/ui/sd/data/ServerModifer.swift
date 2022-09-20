@@ -9,15 +9,15 @@ import Foundation
 import UIKit
 
 struct ServerModifier {
-    var paddingStart: CGFloat?
-    var paddingEnd: CGFloat?
-    var paddingTop: CGFloat?
-    var paddingBottom: CGFloat?
+    var spacingStart: CGFloat?
+    var spacingEnd: CGFloat?
+    var spacingTop: CGFloat?
+    var spacingBottom: CGFloat?
     var width: CGFloat?
     var height: CGFloat?
     var weight: CGFloat?
     var backgroundColor: String?
-    var borderSize: Float?
-    var borderColor: String?
     var cornerRadius: Float?
+    var adaText: String?
+    var aspectRatio: CGFloat?
 }

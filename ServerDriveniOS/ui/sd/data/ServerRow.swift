@@ -8,11 +8,15 @@
 import Foundation
 import UIKit
 
-struct ServerRow: GenericIdentifiable {
+struct ServerRow: ServerView, ServerWeightedContainer {
     var type: ServerItemType = .ROW
     var id = UUID()
     var spacing: CGFloat?
     var modifier: ServerModifier?
     var alignment: ServerAlignment?
-    var items: [GenericIdentifiable]
+    var subviews: [ServerView]
+    
+    var weightDirection: WeightDirection {
+        .horizontal
+    }
 }

@@ -8,25 +8,46 @@
 import Foundation
 import SwiftUI
 
-struct SDColumn: View {
+struct SDColumn: View, SDWeightedContainer {
     var serverColumn: ServerColumn
-    var body: some View {
-        let alignment: HorizontalAlignment = {
-            if serverColumn.alignment == .END {
-                return .trailing
-            } else if serverColumn.alignment == .CENTER {
-                return .center
-            } else {
-                return .leading
-            }
-        }()
-        VStack(alignment: alignment, spacing: serverColumn.spacing ?? 0) {
-            SDContent(items: serverColumn.items)
+    var parentWeightDirection: WeightDirection
+    var parentSize: CGFloat
+    var parentTotalWeight: CGFloat?
+    var nestedInVerticalLayout: Bool
+    var nestedInHorizontalLayout: Bool
+    
+    var sizeAlignment: Alignment {
+        if serverColumn.alignment == .END {
+            return .topTrailing
+        } else if serverColumn.alignment == .CENTER {
+            return .top
+        } else {
+            return .topLeading
         }
-        .size(serverModifier: serverColumn.modifier)
-        .backgroundColor(serverModifier: serverColumn.modifier)
-        .cornerRadius(serverModifier: serverColumn.modifier)
-        .border(serverModifier: serverColumn.modifier)
-        .padding(serverModifier: serverColumn.modifier)
+    }
+    
+    var stackAlignment: HorizontalAlignment {
+        if serverColumn.alignment == .END {
+            return .trailing
+        } else if serverColumn.alignment == .CENTER {
+            return .center
+        } else {
+            return .leading
+        }
+    }
+    
+    var weightedContainer: ServerWeightedContainer {
+        serverColumn
+    }
+    
+    var body: some View {
+        SingleAxisGeometryReader(axis: .vertical) { height in
+            VStack(alignment: stackAlignment, spacing: serverColumn.spacing ?? 0) {
+                SDContent(subviews: serverColumn.subviews, parentWeightDirection: serverColumn.weightDirection, parentSize: calculateAvailableSpace(from: height), parentTotalWeight: serverColumn.getTotalWeight(for: serverColumn.weightDirection), nestedInVerticalLayout: true, nestedInHorizontalLayout: false)
+            }
+            .serverModifier(serverView: serverColumn, alignment: sizeAlignment, parentWeightDirection: parentWeightDirection, parentSize: parentSize, parentTotalWeight: parentTotalWeight, nestedInVerticalLayout: nestedInVerticalLayout, nestedInHorizontalLayout: nestedInHorizontalLayout)
+        }
     }
 }
+
+

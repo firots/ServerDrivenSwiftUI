@@ -10,13 +10,34 @@ import SwiftUI
 
 struct SDImage: View {
     var serverImage: ServerImage
+    var parentWeightDirection: WeightDirection
+    var parentSize: CGFloat
+    var parentTotalWeight: CGFloat?
+    var nestedInVerticalLayout: Bool
+    var nestedInHorizontalLayout: Bool
+    
     var body: some View {
-        Image(serverImage.drawableRes)
+        Image(serverImage.url)
+            .renderingMode(serverImage.tint != nil ? .template: .original)
             .resizable()
-            .size(serverModifier: serverImage.modifier)
-            .modifyIf(serverImage.adaText != nil, transform: {
-                $0.accessibilityLabel(serverImage.adaText!)
+            .modifyIf(serverImage.contentScale == .FIT, transform: {
+                $0.scaledToFit()
             })
-            .padding(serverModifier: serverImage.modifier)
+            .modifyIf(serverImage.contentScale  == .CROP, transform: {
+                $0.scaledToFill()
+            })
+            .modifyIf(serverImage.contentScale  == .FILL_HEIGHT, transform: {
+                $0.scaledToFit()
+                    .fixedSize(horizontal: true, vertical: false)
+            })
+            .modifyIf(serverImage.contentScale  == .FILL_WIDTH, transform: {
+                $0.scaledToFit()
+                    .fixedSize(horizontal: false, vertical: true)
+            })
+            .serverModifier(serverView: serverImage, alignment: serverImage.alignment?.alignment, parentWeightDirection: parentWeightDirection, parentSize: parentSize, parentTotalWeight: nil, nestedInVerticalLayout: nestedInVerticalLayout, nestedInHorizontalLayout: nestedInHorizontalLayout)
+            .modifyIf(serverImage.tint != nil, transform: {
+                $0.foregroundColor(Color(UIColor(withHex: serverImage.tint!)))
+            })
+            .clipped()
     }
 }

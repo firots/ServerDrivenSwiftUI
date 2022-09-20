@@ -5,11 +5,19 @@
 //  Created by David Corrado on 6/30/22.
 //
 
-import Foundation
+import SwiftUI
 
-struct ServerCard: GenericIdentifiable {
+struct ServerCard: ServerView, ServerWeightedContainer {
     var type: ServerItemType = .CARD
     var id = UUID()
     var modifier: ServerModifier?
-    var items: [GenericIdentifiable]
+    var subviews: [ServerView]
+    
+    var spacing: CGFloat? {
+        0
+    }
+    
+    var weightDirection: WeightDirection {
+        .vertical
+    }
 }

@@ -10,21 +10,30 @@ import SwiftUI
 
 struct SDText: View {
     var serverText: ServerText
+    var parentWeightDirection: WeightDirection
+    var parentSize: CGFloat
+    var parentTotalWeight: CGFloat?
+    var nestedInVerticalLayout: Bool
+    var nestedInHorizontalLayout: Bool
+    
+    @Environment(\.sizeCategory) var sizeCategory
+    @Environment(\.legibilityWeight) var legibilityWeight
+    
     var body: some View {
         Text(serverText.text)
             .foregroundColor(Color(UIColor(withHex: serverText.color ?? "#4C5870")))
             .fontWeight(serverText.fontWeight())
-            .font(.system(size: CGFloat(serverText.size ?? 16)))
+            .font(.system(size: UIFontMetrics.default.scaledValue(for: CGFloat(serverText.size ?? 16))))
             .modifyIf(serverText.decoration.contains(.STRIKETHROUGH), transform: {
                 $0.strikethrough(true)
             })
             .modifyIf(serverText.style == .ITALIC, transform: {
                 ($0 as? Text)?.italic()
             })
-            .size(serverModifier: serverText.modifier)
             .modifyIf(serverText.isHeading ?? false, transform: {
                 $0.accessibilityAddTraits(.isHeader)
             })
-            .padding(serverModifier: serverText.modifier)
+            .multilineTextAlignment(serverText.textAlignment?.alignment ?? .leading)
+            .serverModifier(serverView: serverText, parentWeightDirection: parentWeightDirection, parentSize: parentSize, parentTotalWeight: parentTotalWeight, nestedInVerticalLayout: nestedInVerticalLayout, nestedInHorizontalLayout: nestedInHorizontalLayout)
     }
 }

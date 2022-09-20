@@ -8,25 +8,44 @@
 import Foundation
 import SwiftUI
 
-struct SDRow: View {
+struct SDRow: View, SDWeightedContainer {
     var serverRow: ServerRow
-    var body: some View {
-        let alignment: VerticalAlignment = {
-            if serverRow.alignment == .END {
-                return .bottom
-            } else if serverRow.alignment == .CENTER {
-                return .center
-            } else {
-                return .top
-            }
-        }()
-        HStack(alignment: alignment, spacing: serverRow.spacing ?? 0) {
-            SDContent(items: serverRow.items)
+    var parentWeightDirection: WeightDirection
+    var parentSize: CGFloat
+    var parentTotalWeight: CGFloat?
+    var nestedInVerticalLayout: Bool
+    var nestedInHorizontalLayout: Bool
+    
+    var sizeAlignment: Alignment {
+        if serverRow.alignment == .END {
+            return .bottomLeading
+        } else if serverRow.alignment == .CENTER {
+            return .leading
+        } else {
+            return .topLeading
         }
-        .size(serverModifier: serverRow.modifier)
-        .backgroundColor(serverModifier: serverRow.modifier)
-        .cornerRadius(serverModifier: serverRow.modifier)
-        .padding(serverModifier: serverRow.modifier)
-        .border(serverModifier: serverRow.modifier)
+    }
+    
+    var stackAlignment: VerticalAlignment {
+        if serverRow.alignment == .END {
+            return .bottom
+        } else if serverRow.alignment == .CENTER {
+            return .center
+        } else {
+            return .top
+        }
+    }
+    
+    var weightedContainer: ServerWeightedContainer {
+        serverRow
+    }
+    
+    var body: some View {
+        SingleAxisGeometryReader(axis: .horizontal) { width in
+            HStack(alignment: stackAlignment, spacing: serverRow.spacing ?? 0) {
+                SDContent(subviews: serverRow.subviews, parentWeightDirection: serverRow.weightDirection, parentSize: calculateAvailableSpace(from: width), parentTotalWeight: serverRow.getTotalWeight(for: serverRow.weightDirection), nestedInVerticalLayout: false, nestedInHorizontalLayout: true)
+            }
+            .serverModifier(serverView: serverRow, alignment: sizeAlignment, parentWeightDirection: parentWeightDirection, parentSize: parentSize, parentTotalWeight: parentTotalWeight, nestedInVerticalLayout: nestedInVerticalLayout, nestedInHorizontalLayout: nestedInHorizontalLayout)
+        }
     }
 }

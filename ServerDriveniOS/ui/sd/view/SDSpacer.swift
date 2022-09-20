@@ -9,7 +9,15 @@ import Foundation
 import SwiftUI
 
 struct SDSpacer: View {
+    var serverSpacer: ServerSpacer
+    var parentWeightDirection: WeightDirection
+    var parentSize: CGFloat
+    var parentTotalWeight: CGFloat?
+    var nestedInVerticalLayout: Bool
+    var nestedInHorizontalLayout: Bool
+    
     var body: some View {
-        Spacer()
+        Spacer(minLength: 0)
+            .serverModifier(serverView: serverSpacer, parentWeightDirection: parentWeightDirection, parentSize: parentSize, parentTotalWeight: parentTotalWeight, nestedInVerticalLayout: nestedInVerticalLayout, nestedInHorizontalLayout: nestedInHorizontalLayout)
     }
 }

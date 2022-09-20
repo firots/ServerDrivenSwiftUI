@@ -8,67 +8,84 @@
 import Foundation
 import SwiftUI
 
+struct ServerViewModifier: ViewModifier {
+    var serverView: ServerView
+    var alignment: Alignment?
+    var parentWeightDirection: WeightDirection // Weight filling direction
+    var parentSize: CGFloat // Available size of the parent after removing spacings and paddings for supporting weights
+    var parentTotalWeight: CGFloat?
+    var nestedInVerticalLayout: Bool
+    var nestedInHorizontalLayout: Bool
+    
+    func body(content: Content) -> some View {
+        content
+            .padding(serverModifier: serverView.modifier)
+            .size(serverView: serverView, serverModifier: serverView.modifier, weight: serverView.getWeight(for: parentWeightDirection), alignment: alignment, parentWeightDirection: parentWeightDirection, parentSize: parentSize, parentTotalWeight: parentTotalWeight, nestedInVerticalLayout: nestedInVerticalLayout, nestedInHorizontalLayout: nestedInHorizontalLayout)
+            .backgroundColor(serverModifier: serverView.modifier)
+            .cornerRadius(serverModifier: serverView.modifier)
+            .accessibilityLabel(serverModifier: serverView.modifier)
+    }
+}
+
 struct PaddingViewModifier: ViewModifier {
     var serverModifier: ServerModifier?
     func body(content: Content) -> some View {
         content
-            .modifyIf(serverModifier?.paddingStart != nil, transform: { $0.padding(.leading, serverModifier?.paddingStart) })
-            .modifyIf(serverModifier?.paddingEnd != nil, transform: { $0.padding(.trailing, serverModifier?.paddingEnd) })
-            .modifyIf(serverModifier?.paddingTop != nil, transform: { $0.padding(.top, serverModifier?.paddingTop) })
-            .modifyIf(serverModifier?.paddingBottom != nil, transform: { $0.padding(.bottom, serverModifier?.paddingBottom) })
-    }
-}
-
-struct SizeViewModifier: ViewModifier {
-    var serverModifier: ServerModifier?
-    func body(content: Content) -> some View {
-        content
-            .modifyIf(serverModifier?.width != nil && serverModifier?.height != nil, transform: {
-                $0.frame(width: serverModifier?.width, height: serverModifier?.height, alignment: .topLeading)
-            })
+            .modifyIf(serverModifier?.spacingStart != nil, transform: { $0.padding(.leading, serverModifier?.spacingStart) })
+            .modifyIf(serverModifier?.spacingEnd != nil, transform: { $0.padding(.trailing, serverModifier?.spacingEnd) })
+            .modifyIf(serverModifier?.spacingTop != nil, transform: { $0.padding(.top, serverModifier?.spacingTop) })
+            .modifyIf(serverModifier?.spacingBottom != nil, transform: { $0.padding(.bottom, serverModifier?.spacingBottom) })
     }
 }
 
 struct BackgroundColorViewModifier: ViewModifier {
     var serverModifier: ServerModifier?
     func body(content: Content) -> some View {
-        content
-            .modifyIf(serverModifier?.backgroundColor != nil, transform: {
-                $0.background(Color(UIColor(withHex: serverModifier!.backgroundColor!)))
-            })
+        if let backgroundColor = serverModifier?.backgroundColor{
+            content
+                .background(Color(UIColor(withHex: backgroundColor)))
+        } else {
+            content
+        }
     }
 }
 
 struct CornerRadiusViewModifier: ViewModifier {
     var serverModifier: ServerModifier?
     func body(content: Content) -> some View {
-        content
-            .modifyIf(serverModifier?.cornerRadius != nil, transform: {
-                $0.cornerRadius(CGFloat(serverModifier!.cornerRadius!))
-            })
+        if let cornerRadius = serverModifier?.cornerRadius {
+            content
+                .cornerRadius(CGFloat(cornerRadius))
+        } else {
+            content
+        }
     }
 }
 
-struct BorderViewModifier: ViewModifier {
+struct AccessibilityLabelModifier: ViewModifier {
     var serverModifier: ServerModifier?
     func body(content: Content) -> some View {
-        content
-            .modifyIf(serverModifier?.borderColor != nil, transform: {
-                $0.overlay(
-                    RoundedRectangle(cornerRadius: CGFloat(serverModifier?.cornerRadius ?? 0))
-                        .stroke(Color(UIColor(withHex: serverModifier!.borderColor!)), lineWidth: CGFloat(serverModifier?.borderSize ?? 1))
-                )
-            })
+        if let adaText = serverModifier?.adaText {
+            content
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel(adaText)
+        } else {
+            content
+        }
     }
 }
 
 extension View {
+    func serverModifier(serverView: ServerView, alignment: Alignment? = nil, parentWeightDirection: WeightDirection, parentSize: CGFloat, parentTotalWeight: CGFloat?, nestedInVerticalLayout: Bool, nestedInHorizontalLayout: Bool) -> some View {
+        modifier(ServerViewModifier(serverView: serverView, alignment: alignment, parentWeightDirection: parentWeightDirection, parentSize: parentSize, parentTotalWeight: parentTotalWeight, nestedInVerticalLayout: nestedInVerticalLayout, nestedInHorizontalLayout: nestedInHorizontalLayout))
+    }
+    
     func padding(serverModifier: ServerModifier?) -> some View {
         modifier(PaddingViewModifier(serverModifier: serverModifier))
     }
 
-    func size(serverModifier: ServerModifier?) -> some View {
-        modifier(SizeViewModifier(serverModifier: serverModifier))
+    func size(serverView: ServerView, serverModifier: ServerModifier?, weight: CGFloat?, alignment: Alignment?, parentWeightDirection: WeightDirection, parentSize: CGFloat, parentTotalWeight: CGFloat?, nestedInVerticalLayout: Bool, nestedInHorizontalLayout: Bool) -> some View {
+        modifier(SizeViewModifier(serverView: serverView, serverModifier: serverModifier, weight: weight, alignment: alignment, parentWeightDirection: parentWeightDirection, parentSize: parentSize, parentTotalWeight: parentTotalWeight, nestedInVerticalLayout: nestedInVerticalLayout, nestedInHorizontalLayout: nestedInHorizontalLayout))
     }
     
     func backgroundColor(serverModifier: ServerModifier?) -> some View {
@@ -79,8 +96,8 @@ extension View {
         modifier(CornerRadiusViewModifier(serverModifier: serverModifier))
     }
     
-    func border(serverModifier: ServerModifier?) -> some View {
-        modifier(BorderViewModifier(serverModifier: serverModifier))
+    func accessibilityLabel(serverModifier: ServerModifier?) -> some View {
+        modifier(AccessibilityLabelModifier(serverModifier: serverModifier))
     }
 
     @ViewBuilder func modifyIf<Content: View>(_ condition: Bool, transform: (Self) -> Content) -> some View {
